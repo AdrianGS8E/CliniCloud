@@ -1,0 +1,1 @@
+{"version":3,"sources":["app/search.scss"],"names":[],"mappings":"AAEI;EACI;EACA","file":"search.css","sourcesContent":["// Custom search box styling\r\n.search-box {\r\n    &:hover, &:focus-within {\r\n        box-shadow: 0 1px 6px rgba(32,33,36,.28);\r\n        border-color: rgba(223,225,229,0);\r\n    }\r\n}\r\n\r\n"]}
