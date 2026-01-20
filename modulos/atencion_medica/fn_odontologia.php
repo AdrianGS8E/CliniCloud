@@ -103,7 +103,7 @@ function verPacientesConsultorio(){
         echo "<div class='col-md-12'>";
             echo "<div class='card'>";
                 echo "<div class='card-header d-flex justify-content-between align-items-center'>";
-                    echo "<b>Lista de pacientes</b>";
+                    echo "<b>Lista de Atenciones</b>";
                     echo "<div class='d-flex align-items-center gap-2'>";
                         echo "<label for='fechaConsulta' class='mb-0'>Fecha:</label>";
                         echo "<input type='date' id='fechaConsulta' name='fechaConsulta' class='form-control form-control-sm' style='width: auto;' value='" . date('Y-m-d') . "'>";
@@ -118,13 +118,98 @@ function verPacientesConsultorio(){
                     echo "</div>";
                 
                     echo "<div class='table-responsive mt-2'>";
-                        echo "<table class='table table-bordered'>";
-                            echo "<thead>";
+                        echo "<table class='table table-bordered table-hover'>";
+                            echo "<thead class='table-light'>";
                                 echo "<tr>";
+                                    echo "<th>ID Atención</th>";
                                     echo "<th>C.I.</th>";
-                                    echo "<th>Nombre</th>";
+                                    echo "<th>Paciente</th>";
+                                    echo "<th>Consultorio</th>";
+                                    echo "<th>Médico</th>";
+                                    echo "<th>Fecha Atención</th>";
+                                    echo "<th>Estado</th>";
+                                    echo "<th>Acciones</th>";
                                 echo "</tr>";
                             echo "</thead>";
+                            echo "<tbody>";
+                                // Consulta con JOINs para obtener toda la información
+                                $fechaConsulta = isset($input['fechaConsulta']) ? mysqli_real_escape_string($link, $input['fechaConsulta']) : date('Y-m-d');
+                                
+                                $sqlAtenciones = "SELECT 
+                                    ac.`idAtencion`,
+                                    ac.`fechaAtencion`,
+                                    ac.`fechaRegistro`,
+                                    ac.`estadoAtencion`,
+                                    p.`idPaciente`,
+                                    p.`ci`,
+                                    p.`apellidoPat`,
+                                    p.`apellidoMat`,
+                                    p.`nombres`,
+                                    c.`idConsultorio`,
+                                    c.`codigo` as codigoConsultorio,
+                                    c.`descripcion` as descripcionConsultorio,
+                                    u.`idUsuario`,
+                                    u.`nombreUs`,
+                                    u.`primerApUs`,
+                                    u.`segundoApUs`
+                                FROM `atencion_clinica` ac
+                                INNER JOIN `pacientes` p ON ac.`idPaciente` = p.`idPaciente`
+                                INNER JOIN `consultorios` c ON ac.`idConsultorio` = c.`idConsultorio`
+                                INNER JOIN `usuarios` u ON ac.`idUsuario` = u.`idUsuario`
+                                WHERE ac.`idConsultorio` = '" . mysqli_real_escape_string($link, $idConsultorio) . "' 
+                                AND ac.`especialidad` = 'ODONTOLOGIA'
+                                AND DATE(ac.`fechaAtencion`) = '" . $fechaConsulta . "'
+                                ORDER BY ac.`fechaAtencion` DESC";
+                                
+                                $resultAtenciones = mysqli_query($link, $sqlAtenciones);
+                                
+                                if ($resultAtenciones && mysqli_num_rows($resultAtenciones) > 0) {
+                                    while ($rowAtencion = mysqli_fetch_array($resultAtenciones)) {
+                                        $nombreCompletoPaciente = trim($rowAtencion['nombres'] . ' ' . $rowAtencion['apellidoPat'] . ' ' . $rowAtencion['apellidoMat']);
+                                        $nombreCompletoMedico = trim($rowAtencion['nombreUs'] . ' ' . $rowAtencion['primerApUs'] . ' ' . $rowAtencion['segundoApUs']);
+                                        
+                                        // Formatear fecha
+                                        $fechaAtencion = new DateTime($rowAtencion['fechaAtencion']);
+                                        $fechaFormateada = $fechaAtencion->format('d/m/Y H:i');
+                                        
+                                        // Badge para estado
+                                        $badgeEstado = '';
+                                        switch(strtoupper($rowAtencion['estadoAtencion'])) {
+                                            case 'ATENDIDO':
+                                                $badgeEstado = '<span class="badge bg-success">Atendido</span>';
+                                                break;
+                                            case 'PENDIENTE':
+                                                $badgeEstado = '<span class="badge bg-warning">Pendiente</span>';
+                                                break;
+                                            case 'CANCELADO':
+                                                $badgeEstado = '<span class="badge bg-danger">Cancelado</span>';
+                                                break;
+                                            default:
+                                                $badgeEstado = '<span class="badge bg-secondary">' . htmlspecialchars($rowAtencion['estadoAtencion']) . '</span>';
+                                        }
+                                        
+                                        echo "<tr>";
+                                            echo "<td>" . htmlspecialchars($rowAtencion['idAtencion']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($rowAtencion['ci']) . "</td>";
+                                            echo "<td>" . htmlspecialchars($nombreCompletoPaciente) . "</td>";
+                                            echo "<td><small>" . htmlspecialchars($rowAtencion['codigoConsultorio']) . "</small><br><strong>" . htmlspecialchars($rowAtencion['descripcionConsultorio']) . "</strong></td>";
+                                            echo "<td>" . htmlspecialchars($nombreCompletoMedico) . "</td>";
+                                            echo "<td>" . $fechaFormateada . "</td>";
+                                            echo "<td>" . $badgeEstado . "</td>";
+                                            echo "<td class='text-center'>";
+                                                echo "<button class='btn btn-sm btn-primary btnVerAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Ver Detalles'><i class='fas fa-eye'></i></button> ";
+                                                echo "<button class='btn btn-sm btn-info btnEditarAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Editar'><i class='fas fa-edit'></i></button>";
+                                            echo "</td>";
+                                        echo "</tr>";
+                                    }
+                                } else {
+                                    echo "<tr>";
+                                        echo "<td colspan='8' class='text-center text-muted py-3'>";
+                                            echo "<i class='fas fa-info-circle me-2'></i>No hay atenciones registradas para esta fecha.";
+                                        echo "</td>";
+                                    echo "</tr>";
+                                }
+                            echo "</tbody>";
                         echo "</table>";
                     echo "</div>";
 
@@ -194,6 +279,9 @@ function modalSeleccionarPaciente(){
 
 
 function formularioExamenGeneral(){
+
+    date_default_timezone_set('America/La_Paz');
+
     global $link;
     global $input;
 
@@ -253,6 +341,11 @@ function formularioExamenGeneral(){
                         echo "</div>";
                         echo "<input type='hidden' id='idPaciente' name='idPaciente' value='" . htmlspecialchars($idPaciente) . "'>";
                     }
+
+                    echo "<div class='col-md-6 mb-2'>";
+                        echo "<label class='form-label small mb-0'>Fecha y hora de consulta</label>";
+                        echo "<input type='datetime-local' class='form-control form-control-sm mt-1' name='fecha_hora_consulta' id='fecha_hora_consulta' value='" . date('Y-m-d\TH:i') . "'>";
+                    echo "</div>";
 
                     // Examen general (compacto)
                     echo "<div class='card border-primary mb-2'>";
@@ -493,78 +586,42 @@ function guardarExamenGeneral(){
         return;
     }
 
-    // Verificar si existe una atención médica para este paciente y consultorio
-    // Si no existe, crear una nueva atención
+    // Paso 2: Insertar registro en la tabla atencion_clinica
     $fechaAtencion = date('Y-m-d H:i:s');
+    $fechaRegistro = date('Y-m-d H:i:s');
     
-    // Buscar si existe una atención médica reciente (mismo día)
-    $sqlBuscarAtencion = "SELECT `idAtencion` FROM `atenciones_medicas` 
-                          WHERE `idPaciente` = '$idPaciente' 
-                          AND `idConsultorio` = '$idConsultorio' 
-                          AND DATE(`fechaAtencion`) = CURDATE()
-                          ORDER BY `fechaAtencion` DESC 
-                          LIMIT 1";
+    $sqlInsertAtencion = "INSERT INTO `atencion_clinica` 
+                          (`idPaciente`, `idConsultorio`, `fechaAtencion`, `idUsuario`, `fechaRegistro`, `estadoAtencion`) 
+                          VALUES ('$idPaciente', '$idConsultorio', '$fechaAtencion', '$idUsuario', '$fechaRegistro', 'ATENDIDO')";
     
-    $resultAtencion = mysqli_query($link, $sqlBuscarAtencion);
-    
-    if ($resultAtencion && mysqli_num_rows($resultAtencion) > 0) {
-        $rowAtencion = mysqli_fetch_array($resultAtencion);
-        $idAtencion = $rowAtencion['idAtencion'];
-    } else {
-        // Crear nueva atención médica
-        $sqlCrearAtencion = "INSERT INTO `atenciones_medicas` 
-                            (`idPaciente`, `idConsultorio`, `idUsuario`, `fechaAtencion`, `tipoAtencion`, `estado`) 
-                            VALUES ('$idPaciente', '$idConsultorio', '$idUsuario', '$fechaAtencion', 'ODONTOLOGIA', 'ACTIVA')";
-        
-        if (mysqli_query($link, $sqlCrearAtencion)) {
-            $idAtencion = mysqli_insert_id($link);
-        } else {
-            echo json_encode(["estado" => "ERROR", "mensaje" => "Error al crear la atención médica: " . mysqli_error($link)]);
-            return;
-        }
+    if (!mysqli_query($link, $sqlInsertAtencion)) {
+        echo json_encode(["estado" => "ERROR", "mensaje" => "Error al crear la atención clínica: " . mysqli_error($link)]);
+        return;
     }
 
-    // Convertir arrays a JSON
+    // Paso 3: Recuperar el idAtencion del registro anterior
+    $idAtencion = mysqli_insert_id($link);
+
+    // Paso 4: Formatear todos los datos en JSON y registrar en cuaderno_odontologia
     $jsonExamenGeneral = json_encode($examenGeneral, JSON_UNESCAPED_UNICODE);
     $jsonExamenBucoDental = json_encode($examenBucoDental, JSON_UNESCAPED_UNICODE);
     $jsonHabitosCostumbres = json_encode($habitosCostumbres, JSON_UNESCAPED_UNICODE);
+    $jsonRegistroClinico = json_encode(array(), JSON_UNESCAPED_UNICODE); // JSON vacío para jsonRegistroClinico
 
-    // Verificar si ya existe un registro de cuaderno_odontologia para esta atención
-    $sqlVerificar = "SELECT `idCuaOdontologia` FROM `cuaderno_odontologia` WHERE `idAtencion` = '$idAtencion'";
-    $resultVerificar = mysqli_query($link, $sqlVerificar);
-
-    if ($resultVerificar && mysqli_num_rows($resultVerificar) > 0) {
-        // Actualizar registro existente
-        $rowVerificar = mysqli_fetch_array($resultVerificar);
-        $idCuaOdontologia = $rowVerificar['idCuaOdontologia'];
-        
-        $sqlUpdate = "UPDATE `cuaderno_odontologia` 
-                      SET `jsonExamenGenral` = '" . mysqli_real_escape_string($link, $jsonExamenGeneral) . "',
-                          `jsonExamenBucoDental` = '" . mysqli_real_escape_string($link, $jsonExamenBucoDental) . "',
-                          `jsonHabitosCostumbres` = '" . mysqli_real_escape_string($link, $jsonHabitosCostumbres) . "',
-                          `motivoConsulta` = '" . $motivoConsulta . "'
-                      WHERE `idCuaOdontologia` = '$idCuaOdontologia'";
-        
-        if (mysqli_query($link, $sqlUpdate)) {
-            echo json_encode(["estado" => "OK", "mensaje" => "Examen general actualizado correctamente.", "idCuaOdontologia" => $idCuaOdontologia]);
-        } else {
-            echo json_encode(["estado" => "ERROR", "mensaje" => "Error al actualizar: " . mysqli_error($link)]);
-        }
+    // Insertar registro en cuaderno_odontologia
+    $sqlInsertCuaderno = "INSERT INTO `cuaderno_odontologia` 
+                          (`idAtencion`, `tipoAtencion`, `jsonExamenGenral`, `jsonExamenBucoDental`, `jsonHabitosCostumbres`, `motivoConsulta`, `jsonRegistroClinico`) 
+                          VALUES ('$idAtencion', 'EXAMEN_GENERAL', 
+                                  '" . mysqli_real_escape_string($link, $jsonExamenGeneral) . "', 
+                                  '" . mysqli_real_escape_string($link, $jsonExamenBucoDental) . "', 
+                                  '" . mysqli_real_escape_string($link, $jsonHabitosCostumbres) . "', 
+                                  '" . $motivoConsulta . "',
+                                  '" . mysqli_real_escape_string($link, $jsonRegistroClinico) . "')";
+    
+    if (mysqli_query($link, $sqlInsertCuaderno)) {
+        $idCuaOdontologia = mysqli_insert_id($link);
+        echo json_encode(["estado" => "OK", "mensaje" => "Examen general guardado correctamente.", "idCuaOdontologia" => $idCuaOdontologia, "idAtencion" => $idAtencion]);
     } else {
-        // Insertar nuevo registro
-        $sqlInsert = "INSERT INTO `cuaderno_odontologia` 
-                     (`idAtencion`, `tipoAtencion`, `jsonExamenGenral`, `jsonExamenBucoDental`, `jsonHabitosCostumbres`, `motivoConsulta`) 
-                     VALUES ('$idAtencion', 'ODONTOLOGIA', 
-                             '" . mysqli_real_escape_string($link, $jsonExamenGeneral) . "', 
-                             '" . mysqli_real_escape_string($link, $jsonExamenBucoDental) . "', 
-                             '" . mysqli_real_escape_string($link, $jsonHabitosCostumbres) . "', 
-                             '" . $motivoConsulta . "')";
-        
-        if (mysqli_query($link, $sqlInsert)) {
-            $idCuaOdontologia = mysqli_insert_id($link);
-            echo json_encode(["estado" => "OK", "mensaje" => "Examen general guardado correctamente.", "idCuaOdontologia" => $idCuaOdontologia]);
-        } else {
-            echo json_encode(["estado" => "ERROR", "mensaje" => "Error al guardar: " . mysqli_error($link)]);
-        }
+        echo json_encode(["estado" => "ERROR", "mensaje" => "Error al guardar en cuaderno odontología: " . mysqli_error($link)]);
     }
 }

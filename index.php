@@ -50,7 +50,7 @@ switch ($perfilUs) {
 <html lang="es" data-bs-theme="light" class="root-text-sm">
     <head>
         <meta charset="utf-8">
-        <title>CliniCloud V2</title>
+        <title>CliniCloud</title>
         <meta name="description" content="Page Description">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=5">
