@@ -31,12 +31,10 @@ switch ($input['funcion']) {
     case 'modalSeleccionarPaciente':
         modalSeleccionarPaciente();
         break;
-    case 'formularioExamenGeneral':
-        formularioExamenGeneral();
+    case 'verAtencionClinica':
+        verAtencionClinica();
         break;
-    case 'guardarExamenGeneral':
-        guardarExamenGeneral();
-        break;
+    
     default:
         echo json_encode(["estado" => "ERROR", "mensaje" => "Funcion no reconocida."]);
         break;
@@ -122,12 +120,13 @@ function verPacientesConsultorio(){
                             echo "<thead class='table-light'>";
                                 echo "<tr>";
                                     echo "<th>ID Atención</th>";
+                                    echo "<th>Estado</th>";
+                                    echo "<th>Tipo Atención</th>";
                                     echo "<th>C.I.</th>";
                                     echo "<th>Paciente</th>";
                                     echo "<th>Consultorio</th>";
                                     echo "<th>Médico</th>";
                                     echo "<th>Fecha Atención</th>";
-                                    echo "<th>Estado</th>";
                                     echo "<th>Acciones</th>";
                                 echo "</tr>";
                             echo "</thead>";
@@ -151,7 +150,9 @@ function verPacientesConsultorio(){
                                     u.`idUsuario`,
                                     u.`nombreUs`,
                                     u.`primerApUs`,
-                                    u.`segundoApUs`
+                                    u.`segundoApUs`,
+                                    u.`usuarioUs`,
+                                    ac.`tipoAtencion`
                                 FROM `atencion_clinica` ac
                                 INNER JOIN `pacientes` p ON ac.`idPaciente` = p.`idPaciente`
                                 INNER JOIN `consultorios` c ON ac.`idConsultorio` = c.`idConsultorio`
@@ -159,7 +160,7 @@ function verPacientesConsultorio(){
                                 WHERE ac.`idConsultorio` = '" . mysqli_real_escape_string($link, $idConsultorio) . "' 
                                 AND ac.`especialidad` = 'ODONTOLOGIA'
                                 AND DATE(ac.`fechaAtencion`) = '" . $fechaConsulta . "'
-                                ORDER BY ac.`fechaAtencion` DESC";
+                                ORDER BY ac.`fechaAtencion` ASC";
                                 
                                 $resultAtenciones = mysqli_query($link, $sqlAtenciones);
                                 
@@ -176,29 +177,47 @@ function verPacientesConsultorio(){
                                         $badgeEstado = '';
                                         switch(strtoupper($rowAtencion['estadoAtencion'])) {
                                             case 'ATENDIDO':
-                                                $badgeEstado = '<span class="badge bg-success">Atendido</span>';
+                                                $badgeEstado = '<span class="badge bg-success">ATENDIDO</span>';
                                                 break;
                                             case 'PENDIENTE':
-                                                $badgeEstado = '<span class="badge bg-warning">Pendiente</span>';
+                                                $badgeEstado = '<span class="badge bg-warning">PENDIENTE</span>';
                                                 break;
                                             case 'CANCELADO':
-                                                $badgeEstado = '<span class="badge bg-danger">Cancelado</span>';
+                                                $badgeEstado = '<span class="badge bg-secondary">CANCELADO</span>';
                                                 break;
                                             default:
                                                 $badgeEstado = '<span class="badge bg-secondary">' . htmlspecialchars($rowAtencion['estadoAtencion']) . '</span>';
                                         }
+
+                                        $badgeTipoAtencion = '';
+                                        switch(strtoupper($rowAtencion['tipoAtencion'])) {
+                                            case 'EXAMEN GENERAL':
+                                                $badgeTipoAtencion = '<span class="badge bg-primary">EXAMEN GENERAL</span>';
+                                                break;
+                                            case 'REGISTRO CLINICO':
+                                                $badgeTipoAtencion = '<span class="badge bg-danger">EXAMEN BUCODENTAL</span>';
+                                                break;
+                                        }
                                         
                                         echo "<tr>";
                                             echo "<td>" . htmlspecialchars($rowAtencion['idAtencion']) . "</td>";
+                                            echo "<td>" . $badgeEstado . "</td>";
+                                            echo "<td>" . $badgeTipoAtencion . "</td>";
                                             echo "<td>" . htmlspecialchars($rowAtencion['ci']) . "</td>";
                                             echo "<td>" . htmlspecialchars($nombreCompletoPaciente) . "</td>";
                                             echo "<td><small>" . htmlspecialchars($rowAtencion['codigoConsultorio']) . "</small><br><strong>" . htmlspecialchars($rowAtencion['descripcionConsultorio']) . "</strong></td>";
-                                            echo "<td>" . htmlspecialchars($nombreCompletoMedico) . "</td>";
+                                            echo "<td>" . htmlspecialchars($rowAtencion['usuarioUs']) . "</td>";
                                             echo "<td>" . $fechaFormateada . "</td>";
-                                            echo "<td>" . $badgeEstado . "</td>";
+                                            
                                             echo "<td class='text-center'>";
-                                                echo "<button class='btn btn-sm btn-primary btnVerAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Ver Detalles'><i class='fas fa-eye'></i></button> ";
-                                                echo "<button class='btn btn-sm btn-info btnEditarAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Editar'><i class='fas fa-edit'></i></button>";
+                                                // echo "<button class='btn btn-xs btn-primary btnModalImprimirAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Ver Atencion'><i class='fas fa-print'></i></button> ";
+                                                // echo "<button class='btn btn-xs btn-info btnEditarAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Editar Atencion'><i class='fas fa-edit'></i></button>";
+
+                                                // echo "<button class='btn btn-xs mb-2 btn-primary btnModalImprimirAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Ver Atencion'>Examen General</button> ";
+                                                // echo "<button class='btn btn-xs mb-2 btn-danger btnModalImprimirAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Ver Atencion'>Registro Clinico</button> ";
+                                                // echo "<button class='btn btn-xs mb-2 btn-warning btnModalImprimirAtencion' id='" . $rowAtencion['idAtencion'] . "' title='Ver Atencion'>Rayox X</button> ";
+                                                
+                                                echo "<button class='btn btn-xs mb-2 btn-warning btnVerAtencionClinica' id='" . $rowAtencion['idAtencion'] . "' title='Ver Atencion'><i class='fas fa-eye'></i> Ver Atención</button> ";
                                             echo "</td>";
                                         echo "</tr>";
                                     }
@@ -278,350 +297,82 @@ function modalSeleccionarPaciente(){
 }
 
 
-function formularioExamenGeneral(){
-
-    date_default_timezone_set('America/La_Paz');
-
+function verAtencionClinica(){
     global $link;
     global $input;
 
-    $idPaciente = $input['idPaciente'];
-    $idConsultorio = $input['idConsultorio'];
+    $idAtencion = $input['idAtencion'];
+
+    $conAtencionClinica = mysqli_query($link, "SELECT `idAtencion`, `idPaciente`, `idConsultorio`, `fechaAtencion`, `idUsuario`, `fechaRegistro`, `estadoAtencion`, `especialidad`, `tipoAtencion` FROM `atencion_clinica` WHERE `idAtencion` = '$idAtencion'")or die(mysqli_error($link));
+    if(mysqli_num_rows($conAtencionClinica) > 0){
+        $rowAtencionClinica = mysqli_fetch_array($conAtencionClinica);
+        $idAtencion = $rowAtencionClinica['idAtencion'];
+        $idPaciente = $rowAtencionClinica['idPaciente'];
+        $idConsultorio = $rowAtencionClinica['idConsultorio'];
+        $fechaAtencion = $rowAtencionClinica['fechaAtencion'];
+        $idUsuario = $rowAtencionClinica['idUsuario'];
+        $fechaRegistro = $rowAtencionClinica['fechaRegistro'];
+        $estadoAtencion = $rowAtencionClinica['estadoAtencion'];
+        $especialidad = $rowAtencionClinica['especialidad'];
+        $tipoAtencion = $rowAtencionClinica['tipoAtencion'];
+    }
+
+    $conPacientes = mysqli_query($link, "SELECT `idPaciente`, `ci`, `apellidoPat`, `apellidoMat`, `nombres`, 
+    `fechaNacimiento`, `celular`, `email`, `direccion`, `procedencia`, `residencia`, `nombreTutor`, `celularTutor` 
+    FROM `pacientes` WHERE `idPaciente` = '$idPaciente'")or die(mysqli_error($link));
+    if(mysqli_num_rows($conPacientes) > 0){
+        $rowPaciente = mysqli_fetch_array($conPacientes);
+        $ci = $rowPaciente['ci'];
+        $apellidoPat = $rowPaciente['apellidoPat'];
+        $apellidoMat = $rowPaciente['apellidoMat'];
+        $nombres = $rowPaciente['nombres'];
+        $fechaNacimiento = $rowPaciente['fechaNacimiento'];
+        $celular = $rowPaciente['celular'];
+        $email = $rowPaciente['email'];
+        $direccion = $rowPaciente['direccion'];
+        $procedencia = $rowPaciente['procedencia'];
+        $residencia = $rowPaciente['residencia'];
+        $nombreTutor = $rowPaciente['nombreTutor'];
+        $celularTutor = $rowPaciente['celularTutor'];
+    }
+
+
+    //lista de registro del cuaderno de odontologia 
 
     echo "<div class='row'>";
         echo "<div class='col-md-12'>";
-            echo "<div class='card shadow-sm'>";
-                echo "<div class='card-header bg-primary text-white py-2'>";
-                    echo "<h6 class='mb-0'><i class='fas fa-tooth me-2'></i>Formulario de Atención Clínica Odontológica</h6>";
+            echo "<div class='card'>";
+                echo "<div class='card-header d-flex justify-content-between align-items-center'>";
+                    echo "<b>Atencion Clínica</b>";
+                    echo "<div class='d-flex align-items-center gap-2'>";
+                        echo "<label for='fechaConsulta' class='mb-0'>Fecha:</label>";
+                        echo "<input type='date' id='fechaConsulta' name='fechaConsulta' class='form-control form-control-sm' style='width: auto;' value='" . date('Y-m-d') . "'>";
+                    echo "</div>";
                 echo "</div>";
-                echo "<div class='card-body p-3'>";
+                echo "<div class='card-body row'>";
 
-                    // Información del paciente (compacta)
-                    $idPaciente = $input['idPaciente'];
-                    $sqlPaciente = "SELECT `idPaciente`, `ci`, `apellidoPat`, `apellidoMat`, `nombres`, `fechaNacimiento`, `celular`, `email`, `direccion`, `procedencia`, `residencia`, `nombreTutor`, `celularTutor` FROM `pacientes` WHERE `idPaciente` = '" . mysqli_real_escape_string($link, $idPaciente) . "'";
-                    $resultPaciente = mysqli_query($link, $sqlPaciente);
-                    
-                    if ($resultPaciente && mysqli_num_rows($resultPaciente) > 0) {
-                        $paciente = mysqli_fetch_array($resultPaciente);
-                        
-                        $fechaNac = new DateTime($paciente['fechaNacimiento']);
-                        $hoy = new DateTime();
-                        $edad = $hoy->diff($fechaNac)->y;
-                        
-                        echo "<div class='alert alert-light border mb-3 py-2'>";
-                            echo "<div class='row g-2 align-items-center'>";
-                                echo "<div class='col-md-4'>";
-                                    echo "<small class='text-muted d-block mb-0'>Paciente:</small>";
-                                    echo "<strong class='text-primary'>" . htmlspecialchars($paciente['nombres'] . " " . $paciente['apellidoPat'] . " " . $paciente['apellidoMat']) . "</strong>";
-                                echo "</div>";
-                                echo "<div class='col-md-2'>";
-                                    echo "<small class='text-muted d-block mb-0'>C.I.:</small>";
-                                    echo "<span>" . htmlspecialchars($paciente['ci']) . "</span>";
-                                echo "</div>";
-                                echo "<div class='col-md-2'>";
-                                    echo "<small class='text-muted d-block mb-0'>Edad:</small>";
-                                    echo "<span>" . $edad . " años</span>";
-                                echo "</div>";
-                                echo "<div class='col-md-2'>";
-                                    echo "<small class='text-muted d-block mb-0'>Celular:</small>";
-                                    echo "<span>" . htmlspecialchars($paciente['celular']) . "</span>";
-                                echo "</div>";
-                                if (!empty($paciente['nombreTutor']) || !empty($paciente['celularTutor'])) {
-                                    echo "<div class='col-md-2'>";
-                                        echo "<small class='text-muted d-block mb-0'><i class='fas fa-user-shield'></i> Tutor:</small>";
-                                        echo "<small>" . htmlspecialchars($paciente['nombreTutor'] ? $paciente['nombreTutor'] : '-') . "</small>";
-                                    echo "</div>";
-                                }
-                            echo "</div>";
-                            echo "<input type='hidden' id='idPaciente' name='idPaciente' value='" . htmlspecialchars($paciente['idPaciente']) . "'>";
-                        echo "</div>";
-                    } else {
-                        echo "<div class='alert alert-warning py-2 mb-3'>";
-                            echo "<small><i class='fas fa-exclamation-triangle me-1'></i>No se encontró información del paciente.</small>";
-                        echo "</div>";
-                        echo "<input type='hidden' id='idPaciente' name='idPaciente' value='" . htmlspecialchars($idPaciente) . "'>";
-                    }
-
-                    echo "<div class='col-md-6 mb-2'>";
-                        echo "<label class='form-label small mb-0'>Fecha y hora de consulta</label>";
-                        echo "<input type='datetime-local' class='form-control form-control-sm mt-1' name='fecha_hora_consulta' id='fecha_hora_consulta' value='" . date('Y-m-d\TH:i') . "'>";
+                    echo "<div class='col-md-6'>";
+                        echo "<h5 class='card-title'>Paciente</h5>";
+                        echo "<p>" . $ci . " - " . $nombres . " " . $apellidoPat . " " . $apellidoMat . "</p>";
                     echo "</div>";
 
-                    // Examen general (compacto)
-                    echo "<div class='card border-primary mb-2'>";
-                        echo "<div class='card-header bg-primary bg-opacity-10 py-1 px-2'>";
-                            echo "<small class='fw-bold text-primary'><i class='fas fa-stethoscope me-1'></i>Examen General</small>";
-                        echo "</div>";
-                        echo "<div class='card-body p-2'>";
-                            echo "<div class='row g-2'>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Intervenido quirúrgicamente</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='intervenido_quirurgicamente' id='intervenido_quirurgicamente_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='intervenido_quirurgicamente_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='intervenido_quirurgicamente' id='intervenido_quirurgicamente_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='intervenido_quirurgicamente_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Problemas cardíacos</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='problemas_cardiacos' id='problemas_cardiacos_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='problemas_cardiacos_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='problemas_cardiacos' id='problemas_cardiacos_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='problemas_cardiacos_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Diabético</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='diabetico' id='diabetico_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='diabetico_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='diabetico' id='diabetico_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='diabetico_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Alergia medicamentos</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='alergia_medicamentos' id='alergia_medicamentos_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='alergia_medicamentos_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='alergia_medicamentos' id='alergia_medicamentos_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='alergia_medicamentos_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Cicatrización normal</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='cicatrizacion_normal' id='cicatrizacion_normal_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='cicatrizacion_normal_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='cicatrizacion_normal' id='cicatrizacion_normal_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='cicatrizacion_normal_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Problemas coagulación</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='problemas_coagulacion' id='problemas_coagulacion_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='problemas_coagulacion_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='problemas_coagulacion' id='problemas_coagulacion_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='problemas_coagulacion_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Tratamiento médico</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='tratamiento_medico' id='tratamiento_medico_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='tratamiento_medico_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='tratamiento_medico' id='tratamiento_medico_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='tratamiento_medico_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Toma medicamentos</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='toma_medicamentos' id='toma_medicamentos_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='toma_medicamentos_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='toma_medicamentos' id='toma_medicamentos_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='toma_medicamentos_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Embarazo</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='embarazo' id='embarazo_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='embarazo_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='embarazo' id='embarazo_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='embarazo_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>F.U.M</label>";
-                                    echo "<input type='date' class='form-control form-control-sm mt-1' name='fum' id='fum' value=''>";
-                                echo "</div>";
-                            echo "</div>";
-                        echo "</div>";
+                    echo "<div class='col-md-12 text-center'>";
+                        echo "<button class='btn btn-primary' id='btnFormExamenGeneral'><i class='fas fa-print'></i> Examen General</button>";
+                        echo "<button class='btn btn-danger' id='btnFormExamenBucodental'><i class='fas fa-print'></i> Examen Bucodental</button>";
+                        echo "<button class='btn btn-info' id='btnFormExamenRayoxX'><i class='fas fa-print'></i> Registro de Tratamientos</button>";
+                        echo "<button class='btn btn-warning' id='btnFormExamenRayoxX'><i class='fas fa-print'></i> Rayox X</button>";
                     echo "</div>";
 
-                    // Examen bucodental (compacto)
-                    echo "<div class='card border-info mb-2'>";
-                        echo "<div class='card-header bg-info bg-opacity-10 py-1 px-2'>";
-                            echo "<small class='fw-bold text-info'><i class='fas fa-tooth me-1'></i>Examen Bucodental</small>";
-                        echo "</div>";
-                        echo "<div class='card-body p-2'>";
-                            echo "<div class='row g-2'>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Higiene dental</label>";
-                                    echo "<select class='form-select form-select-sm mt-1' name='higiene_dental' id='higiene_dental'>";
-                                        echo "<option value='' selected>Seleccione...</option>";
-                                        echo "<option value='Buena'>Buena</option>";
-                                        echo "<option value='Regular'>Regular</option>";
-                                        echo "<option value='Mala'>Mala</option>";
-                                    echo "</select>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Usa cepillo dental</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='usa_cepillo_dental' id='usa_cepillo_dental_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='usa_cepillo_dental_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='usa_cepillo_dental' id='usa_cepillo_dental_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='usa_cepillo_dental_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Frecuencia cepillado</label>";
-                                    echo "<input type='text' class='form-control form-control-sm mt-1' name='frecuencia_cepillado' id='frecuencia_cepillado' placeholder='Ej: 2 veces/día' value=''>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Usa hilo dental</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='usa_hilo_dental' id='usa_hilo_dental_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='usa_hilo_dental_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='usa_hilo_dental' id='usa_hilo_dental_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='usa_hilo_dental_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                            echo "</div>";
-                        echo "</div>";
-                    echo "</div>";
 
-                    // Hábitos y costumbres (compacto)
-                    echo "<div class='card border-warning mb-2'>";
-                        echo "<div class='card-header bg-warning bg-opacity-10 py-1 px-2'>";
-                            echo "<small class='fw-bold text-warning'><i class='fas fa-clipboard-list me-1'></i>Hábitos y Costumbres</small>";
-                        echo "</div>";
-                        echo "<div class='card-body p-2'>";
-                            echo "<div class='row g-2'>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Respirador bucal</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='respirador_bucal' id='respirador_bucal_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='respirador_bucal_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='respirador_bucal' id='respirador_bucal_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='respirador_bucal_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Usa chupón</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='usa_chupon' id='usa_chupon_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='usa_chupon_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='usa_chupon' id='usa_chupon_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='usa_chupon_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Fuma</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='fuma' id='fuma_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='fuma_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='fuma' id='fuma_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='fuma_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Toma alcohol</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='toma_alcohol' id='toma_alcohol_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='toma_alcohol_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='toma_alcohol' id='toma_alcohol_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='toma_alcohol_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                                echo "<div class='col-6 col-md-4 col-lg-3 col-xl-2'>";
-                                    echo "<label class='form-label small mb-0'>Masca coca</label>";
-                                    echo "<div class='btn-group btn-group-sm w-100 mt-1' role='group'>";
-                                        echo "<input type='radio' class='btn-check' name='masca_coca' id='masca_coca_si' value='Sí'>";
-                                        echo "<label class='btn btn-outline-primary' for='masca_coca_si'>Sí</label>";
-                                        echo "<input type='radio' class='btn-check' name='masca_coca' id='masca_coca_no' value='No'>";
-                                        echo "<label class='btn btn-outline-primary' for='masca_coca_no'>No</label>";
-                                    echo "</div>";
-                                echo "</div>";
-                            echo "</div>";
-                        echo "</div>";
-                    echo "</div>";
-
-                    // Motivo de consulta (compacto)
-                    echo "<div class='card border-success mb-2'>";
-                        echo "<div class='card-header bg-success bg-opacity-10 py-1 px-2'>";
-                            echo "<small class='fw-bold text-success'><i class='fas fa-comment-medical me-1'></i>Motivo de Consulta</small>";
-                        echo "</div>";
-                        echo "<div class='card-body p-2'>";
-                            echo "<textarea class='form-control form-control-sm' name='motivo_consulta' id='motivo_consulta' rows='2' placeholder='Describa el motivo de la consulta...'></textarea>";
-                        echo "</div>";
-                    echo "</div>";
+                
 
                 echo "</div>";
+            echo "</div>";
 
-                echo "<div class='card-footer'>";
-                    echo "<button class='btn btn-primary' id='btnGuardarExamenGeneral'><i class='fas fa-save'></i> Guardar</button>";
-                echo "</div>";
             echo "</div>";
         echo "</div>";
     echo "</div>";
-}
 
-function guardarExamenGeneral(){
-    global $link;
-    global $input;
 
-    $idConsultorio = isset($input['idConsultorio']) ? mysqli_real_escape_string($link, $input['idConsultorio']) : '';
-    $idPaciente = isset($input['idPaciente']) ? mysqli_real_escape_string($link, $input['idPaciente']) : '';
-    $examenGeneral = isset($input['examenGeneral']) ? $input['examenGeneral'] : array();
-    $examenBucoDental = isset($input['examenBucoDental']) ? $input['examenBucoDental'] : array();
-    $habitosCostumbres = isset($input['habitosCostumbres']) ? $input['habitosCostumbres'] : array();
-    $motivoConsulta = isset($input['motivoConsulta']) ? mysqli_real_escape_string($link, $input['motivoConsulta']) : '';
 
-    // Validar datos requeridos
-    if (empty($idConsultorio) || empty($idPaciente)) {
-        echo json_encode(["estado" => "ERROR", "mensaje" => "Faltan datos requeridos (idConsultorio o idPaciente)."]);
-        return;
-    }
-
-    // Obtener idUsuario de la sesión
-    $idUsuario = isset($_SESSION['idUsuario_clinicloud']) ? $_SESSION['idUsuario_clinicloud'] : '';
-
-    if (empty($idUsuario)) {
-        echo json_encode(["estado" => "ERROR", "mensaje" => "Sesión no válida."]);
-        return;
-    }
-
-    // Paso 2: Insertar registro en la tabla atencion_clinica
-    $fechaAtencion = date('Y-m-d H:i:s');
-    $fechaRegistro = date('Y-m-d H:i:s');
-    
-    $sqlInsertAtencion = "INSERT INTO `atencion_clinica` 
-                          (`idPaciente`, `idConsultorio`, `fechaAtencion`, `idUsuario`, `fechaRegistro`, `estadoAtencion`) 
-                          VALUES ('$idPaciente', '$idConsultorio', '$fechaAtencion', '$idUsuario', '$fechaRegistro', 'ATENDIDO')";
-    
-    if (!mysqli_query($link, $sqlInsertAtencion)) {
-        echo json_encode(["estado" => "ERROR", "mensaje" => "Error al crear la atención clínica: " . mysqli_error($link)]);
-        return;
-    }
-
-    // Paso 3: Recuperar el idAtencion del registro anterior
-    $idAtencion = mysqli_insert_id($link);
-
-    // Paso 4: Formatear todos los datos en JSON y registrar en cuaderno_odontologia
-    $jsonExamenGeneral = json_encode($examenGeneral, JSON_UNESCAPED_UNICODE);
-    $jsonExamenBucoDental = json_encode($examenBucoDental, JSON_UNESCAPED_UNICODE);
-    $jsonHabitosCostumbres = json_encode($habitosCostumbres, JSON_UNESCAPED_UNICODE);
-    $jsonRegistroClinico = json_encode(array(), JSON_UNESCAPED_UNICODE); // JSON vacío para jsonRegistroClinico
-
-    // Insertar registro en cuaderno_odontologia
-    $sqlInsertCuaderno = "INSERT INTO `cuaderno_odontologia` 
-                          (`idAtencion`, `tipoAtencion`, `jsonExamenGenral`, `jsonExamenBucoDental`, `jsonHabitosCostumbres`, `motivoConsulta`, `jsonRegistroClinico`) 
-                          VALUES ('$idAtencion', 'EXAMEN_GENERAL', 
-                                  '" . mysqli_real_escape_string($link, $jsonExamenGeneral) . "', 
-                                  '" . mysqli_real_escape_string($link, $jsonExamenBucoDental) . "', 
-                                  '" . mysqli_real_escape_string($link, $jsonHabitosCostumbres) . "', 
-                                  '" . $motivoConsulta . "',
-                                  '" . mysqli_real_escape_string($link, $jsonRegistroClinico) . "')";
-    
-    if (mysqli_query($link, $sqlInsertCuaderno)) {
-        $idCuaOdontologia = mysqli_insert_id($link);
-        echo json_encode(["estado" => "OK", "mensaje" => "Examen general guardado correctamente.", "idCuaOdontologia" => $idCuaOdontologia, "idAtencion" => $idAtencion]);
-    } else {
-        echo json_encode(["estado" => "ERROR", "mensaje" => "Error al guardar en cuaderno odontología: " . mysqli_error($link)]);
-    }
 }
