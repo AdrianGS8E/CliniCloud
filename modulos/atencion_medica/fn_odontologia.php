@@ -92,6 +92,8 @@ function listaConsultorios(){
 
 function verPacientesConsultorio(){
 
+    date_default_timezone_set('America/La_Paz');
+
     global $link;
     global $input;
 
@@ -278,8 +280,9 @@ function modalSeleccionarPaciente(){
                             echo "<td>" . $rowPaciente['fechaNacimiento'] . "</td>";
                             echo "<td>" . $rowPaciente['celular'] . "</td>";
                             echo "<td class='text-center'>";
-                                echo "<button class='btn btn-primary btn-sm btnFormExamenGeneral' id='" . $rowPaciente['idPaciente'] . "' title='Examen General'><i class='fas fa-stethoscope'></i> Examen General</button>";
-                                echo "<button class='btn btn-danger btn-sm btnFormRegistroTratamientos' id='" . $rowPaciente['idPaciente'] . "' title='Registro de Tratamientos'><i class='fas fa-tooth'></i> Registro de Tratamientos</button>";
+                                // echo "<button class='btn btn-primary btn-sm btnFormExamenGeneral' id='" . $rowPaciente['idPaciente'] . "' title='Examen General'><i class='fas fa-stethoscope'></i> Examen General</button>";
+                                // echo "<button class='btn btn-danger btn-sm btnFormRegistroTratamientos' id='" . $rowPaciente['idPaciente'] . "' title='Registro de Tratamientos'><i class='fas fa-tooth'></i> Registro de Tratamientos</button>";
+                                echo "<button class='btn btn-primary btn-sm btnFormCrearAtencionClinica' id='" . $rowPaciente['idPaciente'] . "' title='Crear Atención Clínica'><i class='fas fa-plus'></i> Crear Atención Clínica</button>";
                             echo "</td>";
                         echo "</tr>";
                     }
@@ -357,10 +360,10 @@ function verAtencionClinica(){
                     echo "</div>";
 
                     echo "<div class='col-md-12 text-center'>";
-                        echo "<button class='btn btn-primary' id='btnFormExamenGeneral'><i class='fas fa-print'></i> Examen General</button>";
-                        echo "<button class='btn btn-danger' id='btnFormExamenBucodental'><i class='fas fa-print'></i> Examen Bucodental</button>";
-                        echo "<button class='btn btn-info' id='btnFormExamenRayoxX'><i class='fas fa-print'></i> Registro de Tratamientos</button>";
-                        echo "<button class='btn btn-warning' id='btnFormExamenRayoxX'><i class='fas fa-print'></i> Rayox X</button>";
+                        echo "<button class='btn btn-primary m-2' id='btnFormExamenGeneral'><i class='fas fa-print'></i> Examen General</button>";
+                        echo "<button class='btn btn-danger m-2' id='btnFormExamenBucodental'><i class='fas fa-print'></i> Examen Bucodental</button>";
+                        echo "<button class='btn btn-info m-2' id='btnFormExamenRayoxX'><i class='fas fa-print'></i> Registro de Tratamientos</button>";
+                        echo "<button class='btn btn-warning m-2' id='btnFormExamenRayoxX'><i class='fas fa-print'></i> Rayox X</button>";
                     echo "</div>";
 
 
