@@ -33,6 +33,16 @@ require_once "../../config_db_mysql.php";
 
                 $("#contenido").html(data);
 
+                var table = $("#tablaPacientes").DataTable();
+
+                // Cuando se navega o se busca, hay que volver a adjuntar el evento a los botones
+                table.on('draw', function() {
+                    $(".btnFormEditarPaciente").off("click").on("click", function () { 
+                        let idPaciente = $(this).attr("id");
+                        formEditarPaciente(idPaciente, table);
+                    });
+                });
+
                 $("#btnFormNuevoPaciente").click(function () { 
                     formNuevoPaciente();
                 });

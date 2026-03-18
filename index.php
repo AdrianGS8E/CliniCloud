@@ -89,6 +89,11 @@ switch ($perfilUs) {
 
         <link rel="stylesheet" media="screen, print" href="assets/css/apexcharts.css">
 
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/styles/ht-theme-horizon.min.css">
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+
+
         <style>
             .ace_log-error    { color: #ff5555; font-weight: bold; }  /* rojo */
             .ace_log-success  { color: #50fa7b; font-weight: bold; }  /* verde */
@@ -555,12 +560,12 @@ switch ($perfilUs) {
                             echo "</li>";
 
                             echo "<li class='nav-title'><span>Recepcion</span></li>";
-                            echo "<li class='nav-item' id='modulos/reportes/reportes.php'>";
-                                echo "<a href='#'>";
-                                    echo "<i class='fas fa-cash-register'></i>";
-                                    echo "<span class='nav-link-text'>Caja</span>";
-                                echo "</a>";
-                            echo "</li>";
+                            // echo "<li class='nav-item' id='modulos/reportes/reportes.php'>";
+                            //     echo "<a href='#'>";
+                            //         echo "<i class='fas fa-cash-register'></i>";
+                            //         echo "<span class='nav-link-text'>Caja</span>";
+                            //     echo "</a>";
+                            // echo "</li>";
                             echo "<li class='nav-item' id='modulos/pacientes/pacientes.php'>";
                                 echo "<a href='#'>";
                                     echo "<i class='fas fa-user-injured'></i>";
@@ -607,10 +612,10 @@ switch ($perfilUs) {
                             //         echo "<span class='nav-link-text'>Dermatología</span>";
                             //     echo "</a>";
                             // echo "</li>";
-                            echo "<li class='nav-item' id='modulos/atencion_medica/odontologia.php'>";
+                            echo "<li class='nav-item' id='modulos/atencion_medica/atencion_clinica.php'>";
                                 echo "<a href='#'>";
                                     echo "<i class='fas fa-tooth'></i>";
-                                    echo "<span class='nav-link-text'>Odontología</span>";
+                                    echo "<span class='nav-link-text'>Atencion Clinica</span>";
                                 echo "</a>";
                             echo "</li>";
                             // echo "<li class='nav-item' id='modulos/atencion_medica/rayosx.php'>";
@@ -624,18 +629,19 @@ switch ($perfilUs) {
                             if($perfilUs == "ADMINISTRADOR" || $perfilUs == "CONTADOR"){
                                 
                                 echo "<li class='nav-title'><span>Reportes</span></li>";
-                                echo "<li class='nav-item' id='modulos/reportes/reportes.php'>";
-                                    echo "<a href='#'>";
-                                        echo "<i class='fas fa-chart-bar'></i>";
-                                        echo "<span class='nav-link-text'>Reporte Estadistico</span>";
-                                    echo "</a>";
-                                echo "</li>";
-                                echo "<li class='nav-item' id='modulos/reportes/reportes.php'>";
+                                echo "<li class='nav-item' id='modulos/reportes/reporte_ingresos.php'>";
                                     echo "<a href='#'>";
                                         echo "<i class='fas fa-chart-pie'></i>";
                                         echo "<span class='nav-link-text'>Reporte Economico</span>";
                                     echo "</a>";
                                 echo "</li>";
+                                echo "<li class='nav-item' id='modulos/reportes/reporte_estadistico.php'>";
+                                    echo "<a href='#'>";
+                                        echo "<i class='fas fa-chart-bar'></i>";
+                                        echo "<span class='nav-link-text'>Reporte Estadistico</span>";
+                                    echo "</a>";
+                                echo "</li>";
+                                
 
                             }
                             

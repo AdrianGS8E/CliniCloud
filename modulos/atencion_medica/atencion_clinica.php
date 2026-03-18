@@ -18,7 +18,7 @@ require_once "../../config_db_mysql.php";
         function listaConsultorios() {
             console.log("listando consultorios");
             $("#contenido").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/fn_atencion_clinica.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -50,7 +50,7 @@ require_once "../../config_db_mysql.php";
             if (fechaConsulta) {
                 bodyData.fechaConsulta = fechaConsulta;
             }
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/fn_atencion_clinica.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -97,7 +97,7 @@ require_once "../../config_db_mysql.php";
         function modalSeleccionarPaciente(idConsultorio){
             $("#modal-xl").modal("show");
             $("#modal-xl-content").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/fn_atencion_clinica.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -130,7 +130,7 @@ require_once "../../config_db_mysql.php";
 
         function crearAtencionClinica(idConsultorio, idPaciente){
             $("#contenido").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/fn_atencion_clinica.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -170,7 +170,7 @@ require_once "../../config_db_mysql.php";
 
         function verAtencionClinica(idAtencion){
             $("#contenido").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/fn_atencion_clinica.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -189,17 +189,46 @@ require_once "../../config_db_mysql.php";
 
 
                 $("#btnFormExamenGeneral").click(function () { 
-                    formularioExamenGeneral(idAtencion);
-                });
-
-                $("#btnListaRegistroCuaadernoOdontologia").click(function () { 
-                    listaRegistroCuaadernoOdontologia(idAtencion);
+                    $("#modal-xl").modal("show");
+                    $("#modal-xl-content").html(loader);
+                    $("#modal-xl-content").load("modulos/atencion_medica/examen_general/examen_general.php", { idAtencion: idAtencion });
                 });
 
                 $("#btnFormRegistroTratamientos").click(function () { 
-                    formularioRegistroTratamientos(idAtencion);
+                    $("#modal-xl").modal("show");
+                    $("#modal-xl-content").html(loader);
+                    $("#modal-xl-content").load("modulos/atencion_medica/registro_clinico/registro_clinico.php", { idAtencion: idAtencion });
                 });
 
+                $("#btnFormRayoxX").click(function () { 
+                    $("#modal-xl").modal("show");
+                    $("#modal-xl-content").html(loader);
+                    $("#modal-xl-content").load("modulos/atencion_medica/rayos_x/rayos_x.php", { idAtencion: idAtencion });
+                });
+
+                $("#btnFormSolicitudProtesico").click(function () { 
+                    $("#modal-xl").modal("show");
+                    $("#modal-xl-content").html(loader);
+                    $("#modal-xl-content").load("modulos/atencion_medica/protesico/solicitud_protesico.php", { idAtencion: idAtencion });
+                });
+
+                $("#btnHistorialOdontologico").click(function () { 
+                    $("#modal-xl").modal("show");
+                    $("#modal-xl-content").html(loader);
+                    $("#modal-xl-content").load("modulos/atencion_medica/historial/historial.php", { idAtencion: idAtencion });
+                });
+
+                $("#btnRegistroPrestaciones").click(function () { 
+                    $("#modal").modal("show");
+                    $("#modal-content").html(loader);
+                    $("#modal-content").load("modulos/atencion_medica/registro_economico/registro_prestaciones.php", { idAtencion: idAtencion });
+                });
+
+                $("#btnRegistroPago").click(function () { 
+                    $("#modal-xl").modal("show");
+                    $("#modal-xl-content").html(loader);
+                    $("#modal-xl-content").load("modulos/atencion_medica/registro_economico/registro_pago.php", { idAtencion: idAtencion });
+                });
 
             })
             .catch(function(error) {
@@ -210,7 +239,7 @@ require_once "../../config_db_mysql.php";
 
         function listaRegistroCuaadernoOdontologia(idAtencion){
             $("#divCuadernoOdontologia").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/registro_clinico/fn_registro_clinico.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -241,7 +270,7 @@ require_once "../../config_db_mysql.php";
 
         function formularioExamenGeneral(idAtencion){
             $("#divCuadernoOdontologia").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/examen_general/fn_examen_general.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -298,7 +327,7 @@ require_once "../../config_db_mysql.php";
 
         function guardarExamenGeneral(idAtencion, jsonDatosExamenGeneral){
             $("#divCuadernoOdontologia").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/examen_general/fn_examen_general.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -339,10 +368,117 @@ require_once "../../config_db_mysql.php";
         }
 
 
+        function modalDetalleCuentaPaciente(idPaciente){
+            $("#modal-xl-content").html(loader);
+            $("#modal-xl").modal("show");
+            fetch("modulos/atencion_medica/fn_atencion_clinica.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    funcion: "detalleCuentaPaciente",
+                    idPaciente: idPaciente
+                })
+            })
+            .then(function (response) { return response.text(); })
+            .then(function (data) {
+                if (!verificarSesion(data)) return;
+                $("#modal-xl-content").html(data);
+
+                $(".btnPagarOrden").click(function () { 
+                    let idOrdenAtencion = $(this).attr("id");
+                    //pagarOrden(idOrdenAtencion);
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '¿Estás seguro de querer pagar esta orden?',
+                        text: 'Esta acción no se puede deshacer',
+                        showCancelButton: true,
+                        confirmButtonText: 'Si, pagar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            pagarOrden(idOrdenAtencion, idPaciente);
+                        }
+                    });
+                });
+
+                $(".btnVerRecibo").click(function () { 
+                    let idRecibo = $(this).attr("id");
+                    verRecibo(idRecibo);
+                });
+
+
+            })
+            .catch(function(error) {
+                console.error("Error:", error);
+                alert("Error al cargar el detalle de la cuenta");
+            });
+        }
+
+        function pagarOrden(idOrdenAtencion, idPaciente){
+            $("#modal-xl-content").html(loader);
+            fetch("modulos/atencion_medica/fn_atencion_clinica.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    funcion: "pagarOrden",
+                    idOrdenAtencion: idOrdenAtencion,
+                    idPaciente: idPaciente
+                })
+            })
+            .then(function (response) { return response.text(); })
+            .then(function (data) {
+                if (!verificarSesion(data)) return;
+
+                data = JSON.parse(data);
+                if(data.estado == "OK"){
+                    let idRecibo = data.idRecibo;
+                    verRecibo(idRecibo);
+                }
+                else{
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: data.mensaje
+                    });
+                }
+            })
+            .catch(function(error) {
+                console.error("Error:", error);
+                alert("Error al pagar la orden");
+            });
+        }
+
+        function verRecibo(idRecibo){
+            $("#modal-xl-content").html(loader);
+            fetch("modulos/atencion_medica/fn_atencion_clinica.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    funcion: "verRecibo",
+                    idRecibo: idRecibo
+                })
+            })
+            .then(function (response) { return response.text(); })
+            .then(function (data) {
+                if (!verificarSesion(data)) return;
+                $("#modal-xl-content").html(data);
+            })
+            .catch(function(error) {
+                console.error("Error:", error);
+                alert("Error al cargar el recibo");
+            });
+        }
+
         function imprimirRegistroCuaderno(idAtencion, idCuaOdontologia){
             $("#modal-xl-content").html(loader);
             $("#modal-xl").modal("show");
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/registro_clinico/fn_registro_clinico.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -367,7 +503,7 @@ require_once "../../config_db_mysql.php";
 
         function formularioRegistroTratamientos(idAtencion){
             $("#divCuadernoOdontologia").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/registro_clinico/fn_registro_clinico.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -381,55 +517,37 @@ require_once "../../config_db_mysql.php";
             .then(function (data) {
                 if (!verificarSesion(data)) return;
                 $("#divCuadernoOdontologia").html(data);
+                try {
+                    // Calcular total al cambiar el select de costo tratamiento
+                    $(document).on("change", ".campo-tratamiento", function () {
+                        calcularTotalRegistro($(this).closest(".registro-tratamiento"));
+                    });
 
-                // Agregar el primer registro
-                agregarRegistroTratamiento();
+                    // Estado de pago: alternar entre Pendiente y Pagado al hacer clic en los botones
+                    $(document).on("click", ".btn-estado-pago", function () {
+                        let $btn = $(this);
+                        let valor = $btn.data("value");
+                        let $grupo = $btn.closest(".btn-group");
+                        let $input = $grupo.closest(".col-md-3").find(".campo-estado-pago");
+                        $grupo.find(".btn-estado-pago").removeClass("active");
+                        $btn.addClass("active");
+                        $input.val(valor);
+                    });
 
-                // Evento para agregar nuevo registro
-                $("#btnAgregarRegistro").click(function () { 
-                    agregarRegistroTratamiento();
-                });
-
-                // Evento delegado para eliminar registros
-                $(document).on("click", ".btnEliminarRegistro", function () {
-                    $(this).closest(".registro-tratamiento").remove();
-                    actualizarNumerosRegistros();
-                    calcularTotalGeneral();
-                });
-
-                // Evento delegado para cuando cambia el tratamiento (calcular total)
-                $(document).on("change", ".campo-tratamiento", function () {
-                    calcularTotalRegistro($(this).closest(".registro-tratamiento"));
-                    calcularTotalGeneral();
-                });
-
-                // Evento para guardar
-                $("#btnGuardarRegistroTratamiento").click(function () { 
-                    guardarRegistroTratamientos(idAtencion);
-                });
+                    // Evento para guardar
+                    $("#btnGuardarRegistroTratamiento").click(function () {
+                        guardarRegistroTratamientos(idAtencion);
+                    });
+                } catch (e) {
+                    console.error("Error al configurar eventos del formulario:", e);
+                }
             })
             .catch(function(error) {
                 console.error("Error:", error);
-                alert("Error al cargar el formulario de registro de tratamientos");
-            });
-        }
-
-        function agregarRegistroTratamiento(){
-            let template = $("#templateRegistro").html();
-            let indice = Date.now() + Math.random();
-            let numero = $(".registro-tratamiento").length + 1;
-            
-            template = template.replace(/\{\{INDICE\}\}/g, indice);
-            template = template.replace(/\{\{NUMERO\}\}/g, numero);
-            
-            $("#contenedorRegistrosTratamientos").append(template);
-            actualizarNumerosRegistros();
-        }
-
-        function actualizarNumerosRegistros(){
-            $(".registro-tratamiento").each(function(index) {
-                $(this).find(".numero-registro").text(index + 1);
-                $(this).attr("data-indice", index);
+                // Solo mostrar alert si el formulario no llegó a cargarse
+                if (!$("#formularioRegistroUnico").length && !$("#divCuadernoOdontologia .registro-tratamiento").length) {
+                    alert("Error al cargar el formulario de registro de tratamientos");
+                }
             });
         }
 
@@ -445,96 +563,69 @@ require_once "../../config_db_mysql.php";
             $registro.find(".campo-total").val(precio.toFixed(2));
         }
 
-        function calcularTotalGeneral(){
-            let totalGeneral = 0;
-            
-            $(".campo-total").each(function() {
-                let valor = parseFloat($(this).val()) || 0;
-                totalGeneral += valor;
-            });
-            
-            $("#totalGeneral").text(totalGeneral.toFixed(2));
-        }
-
         function guardarRegistroTratamientos(idAtencion){
-            // Validar que haya al menos un registro
-            if($(".registro-tratamiento").length == 0){
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Advertencia',
-                    text: 'Debe agregar al menos un registro de tratamiento'
-                });
+            let $registro = $("#formularioRegistroUnico");
+            if($registro.length == 0){
+                $registro = $(".registro-tratamiento").first();
+            }
+
+            let fecha = $registro.find(".campo-fecha").val();
+            let motivoConsulta = $registro.find(".campo-motivo").val();
+            let pieza = $registro.find(".campo-pieza").val();
+            let diagnostico = $registro.find(".campo-diagnostico").val();
+            let tratamientoRealizado = $registro.find(".campo-tratamiento-realizado").val();
+            let tratamiento = $registro.find(".campo-tratamiento").val();
+            let estadoPago = $registro.find(".campo-estado-pago").val();
+
+            if(!fecha || fecha.trim() == ''){
+                Swal.fire({ icon: 'error', title: 'Error de validación', text: 'El campo Fecha es requerido' });
+                return;
+            }
+            if(!motivoConsulta || motivoConsulta.trim() == ''){
+                Swal.fire({ icon: 'error', title: 'Error de validación', text: 'El campo Motivo de consulta es requerido' });
+                return;
+            }
+            if(!pieza || pieza.trim() == ''){
+                Swal.fire({ icon: 'error', title: 'Error de validación', text: 'El campo Pieza dental tratada es requerido' });
+                return;
+            }
+            if(!diagnostico || diagnostico.trim() == ''){
+                Swal.fire({ icon: 'error', title: 'Error de validación', text: 'El campo Diagnóstico es requerido' });
+                return;
+            }
+            if(!tratamientoRealizado || tratamientoRealizado.trim() == ''){
+                Swal.fire({ icon: 'error', title: 'Error de validación', text: 'El campo Tratamiento realizado es requerido' });
+                return;
+            }
+            if(!tratamiento || tratamiento == ''){
+                Swal.fire({ icon: 'error', title: 'Error de validación', text: 'Debe seleccionar un Costo tratamiento' });
+                return;
+            }
+            if(!estadoPago || estadoPago == ''){
+                Swal.fire({ icon: 'error', title: 'Error de validación', text: 'Debe seleccionar Estado de pago (Pendiente o Pagado)' });
                 return;
             }
 
-            // Validar campos requeridos
-            let hayErrores = false;
-            let mensajeError = "";
+            let $selectTratamiento = $registro.find(".campo-tratamiento");
+            let $optionSeleccionada = $selectTratamiento.find("option:selected");
+            let total = parseFloat($registro.find(".campo-total").val()) || 0;
 
-            $(".registro-tratamiento").each(function(index) {
-                let fecha = $(this).find(".campo-fecha").val();
-                let diagnostico = $(this).find(".campo-diagnostico").val();
-                let pieza = $(this).find(".campo-pieza").val();
-                let tratamiento = $(this).find(".campo-tratamiento").val();
+            let registro = {
+                fecha: fecha,
+                motivoConsulta: motivoConsulta.trim(),
+                pieza: pieza.trim(),
+                diagnostico: diagnostico.trim(),
+                tratamientoRealizado: tratamientoRealizado.trim(),
+                idArancel: $selectTratamiento.val(),
+                codigoArancel: $optionSeleccionada.data("codigo") || "",
+                descripcionArancel: $optionSeleccionada.text().split(" - ")[1]?.split(" (Bs.")[0] || "",
+                precio: parseFloat($optionSeleccionada.data("precio")) || 0,
+                total: total,
+                estadoPago: estadoPago
+            };
 
-                if(!fecha || fecha.trim() == ''){
-                    hayErrores = true;
-                    mensajeError = "El campo Fecha es requerido en el registro #" + (index + 1);
-                    return false;
-                }
-                if(!diagnostico || diagnostico.trim() == ''){
-                    hayErrores = true;
-                    mensajeError = "El campo Diagnóstico es requerido en el registro #" + (index + 1);
-                    return false;
-                }
-                if(!pieza || pieza.trim() == ''){
-                    hayErrores = true;
-                    mensajeError = "El campo Pieza N° es requerido en el registro #" + (index + 1);
-                    return false;
-                }
-                if(!tratamiento || tratamiento == ''){
-                    hayErrores = true;
-                    mensajeError = "El campo Tratamiento es requerido en el registro #" + (index + 1);
-                    return false;
-                }
-            });
-
-            if(hayErrores){
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de validación',
-                    text: mensajeError
-                });
-                return;
-            }
-
-            // Recopilar todos los registros en un array
-            let registros = [];
-            
-            $(".registro-tratamiento").each(function() {
-                let $registro = $(this);
-                let $selectTratamiento = $registro.find(".campo-tratamiento");
-                let $optionSeleccionada = $selectTratamiento.find("option:selected");
-                
-                let registro = {
-                    fecha: $registro.find(".campo-fecha").val(),
-                    diagnostico: $registro.find(".campo-diagnostico").val(),
-                    pieza: $registro.find(".campo-pieza").val(),
-                    idArancel: $selectTratamiento.val(),
-                    codigoArancel: $optionSeleccionada.data("codigo") || "",
-                    descripcionArancel: $optionSeleccionada.text().split(" - ")[1]?.split(" (Bs.")[0] || "",
-                    precio: parseFloat($optionSeleccionada.data("precio")) || 0,
-                    medicion: $registro.find(".campo-medicion").val() || "",
-                    total: parseFloat($registro.find(".campo-total").val()) || 0
-                };
-                
-                registros.push(registro);
-            });
-
-            // Crear objeto JSON con todos los registros
             let datosRegistroTratamientos = {
-                registros: registros,
-                totalGeneral: parseFloat($("#totalGeneral").text()) || 0
+                registro: registro,
             };
 
             let jsonDatosRegistroTratamientos = JSON.stringify(datosRegistroTratamientos);
@@ -542,7 +633,7 @@ require_once "../../config_db_mysql.php";
 
             // Enviar al servidor
             $("#divCuadernoOdontologia").html(loader);
-            fetch("modulos/atencion_medica/fn_odontologia.php", {
+            fetch("modulos/atencion_medica/registro_clinico/fn_registro_clinico.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -556,7 +647,15 @@ require_once "../../config_db_mysql.php";
             .then(function (response) { return response.text(); })
             .then(function (data) {
                 if (!verificarSesion(data)) return;
+
+                console.log("Datos del registro de tratamientos:", data);
+
                 data = JSON.parse(data);
+
+                if (data.idRecibo) {
+                    $("#modal-xl").modal("show");
+                    verRecibo(data.idRecibo);
+                }
 
                 if(data.estado == "OK"){
                     Swal.fire({

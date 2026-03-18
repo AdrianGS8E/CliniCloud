@@ -53,7 +53,7 @@ function listaPacientes(){
                     echo "<b>Lista de pacientes</b>";
                 echo "</div>";
                 echo "<div class='card-body'>";
-                    echo "<table class='table table-bordered'>";
+                    echo "<table class='table table-bordered table-sm table-hover' id='tablaPacientes'>";
                         echo "<thead>";
                             echo "<tr>";
                                 echo "<th>C.I.</th>";
