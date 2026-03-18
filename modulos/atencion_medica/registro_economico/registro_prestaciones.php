@@ -1,21 +1,21 @@
 <?php
 
     $idAtencion = $_POST['idAtencion'];
-    echo "<input type='hidden' id='idAtencion' value='$idAtencion'>";
+    echo "<input type='hidden' id='idAtencionRegistroPrestaciones' value='$idAtencion'>";
 ?>
 
-<div id='divContenidoModal'></div>
+<div id='divContenidoModalRegistroPrestaciones'></div>
 
 <script>
 
     $(document).ready(function() {
 
-        let idAtencion = $("#idAtencion").val();
+        let idAtencion = $("#idAtencionRegistroPrestaciones").val();
 
         formularioRegistroPrestaciones(idAtencion);
 
         function formularioRegistroPrestaciones(idAtencion){
-            $("#divContenidoModal").html(loader);
+            $("#divContenidoModalRegistroPrestaciones").html(loader);
             fetch("modulos/atencion_medica/registro_economico/fn_registro_prestaciones.php", {
                 method: "POST",
                 headers: {
@@ -29,7 +29,7 @@
             .then(function (response) { return response.text(); })
             .then(function (data) {
                 if (!verificarSesion(data)) return;
-                $("#divContenidoModal").html(data);
+                $("#divContenidoModalRegistroPrestaciones").html(data);
 
                 const container = document.getElementById('hotPrestaciones');
                 const totalEl = document.getElementById('totalPrestacionesValor');
@@ -163,7 +163,7 @@
 
 
         function registrarPrestaciones(idAtencion, jsonDetallePrestaciones, montoTotal, estado){
-            $("#divContenidoModal").html(loader);
+            $("#divContenidoModalRegistroPrestaciones").html(loader);
             fetch("modulos/atencion_medica/registro_economico/fn_registro_prestaciones.php", {
                 method: "POST",
                 headers: {
@@ -210,7 +210,7 @@
         }
 
         function verOrdenAtencion(idOrdenAtencion){
-            $("#divContenidoModal").html(loader);
+            $("#divContenidoModalRegistroPrestaciones").html(loader);
             fetch("modulos/atencion_medica/registro_economico/fn_registro_prestaciones.php", {
                 method: "POST",
                 headers: {
@@ -224,7 +224,7 @@
             .then(function (response) { return response.text(); })
             .then(function (data) {
                 if (!verificarSesion(data)) return;
-                $("#divContenidoModal").html(data);
+                $("#divContenidoModalRegistroPrestaciones").html(data);
             })
             .catch(function(error) {
                 console.error("Error:", error);

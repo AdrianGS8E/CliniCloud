@@ -1,20 +1,20 @@
 <?php
 
     $idAtencion = $_POST['idAtencion'];
-    echo "<input type='hidden' id='idAtencion' value='$idAtencion'>";
+    echo "<input type='hidden' id='idAtencionRegistroPago' value='$idAtencion'>";
 ?>
 
-<div id='divContenidoModal'></div>
+<div id='divContenidoModalRegistroPago'></div>
 
 <script>
 
     $(document).ready(function() {
 
-        let idAtencion = $("#idAtencion").val();
+        let idAtencion = $("#idAtencionRegistroPago").val();
 
         listaOrdenesAtencion(idAtencion);
         function listaOrdenesAtencion(idAtencion){
-            $("#divContenidoModal").html(loader);
+            $("#divContenidoModalRegistroPago").html(loader);
             fetch("modulos/atencion_medica/registro_economico/fn_registro_pago.php", {
                 method: "POST",
                 headers: {
@@ -30,7 +30,7 @@
                 if (!verificarSesion(data)) return;
 
 
-                $("#divContenidoModal").html(data);
+                $("#divContenidoModalRegistroPago").html(data);
 
                 
             })
