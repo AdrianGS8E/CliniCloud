@@ -429,50 +429,178 @@ function verAtencionClinica(){
     }
 
 
+    // Estadísticas económicas del paciente (para el panel)
+    $saldoPendiente = 0;
+    $totalAtenciones = 0;
+    $totalCotizaciones = 0;
+
+    $sqlSaldoPendiente = "SELECT COALESCE(SUM(`saldoPendiente`),0) AS `saldoPendiente`
+                           FROM `orden_atencion`
+                           WHERE `idPaciente` = '$idPaciente'
+                           AND `estado` = 'ORDEN ATENCION'";
+    $resSaldoPendiente = mysqli_query($link, $sqlSaldoPendiente) or die(mysqli_error($link));
+    if(mysqli_num_rows($resSaldoPendiente) > 0){
+        $rowSaldo = mysqli_fetch_array($resSaldoPendiente);
+        $saldoPendiente = (float) $rowSaldo['saldoPendiente'];
+    }
+
+    $sqlAtenciones = "SELECT COUNT(`idOrdenAtencion`) AS `totalAtenciones`
+                      FROM `orden_atencion`
+                      WHERE `idPaciente` = '$idPaciente'
+                      AND `estado` = 'ORDEN ATENCION'";
+    $resAtenciones = mysqli_query($link, $sqlAtenciones) or die(mysqli_error($link));
+    if(mysqli_num_rows($resAtenciones) > 0){
+        $rowAtenciones = mysqli_fetch_array($resAtenciones);
+        $totalAtenciones = (int) $rowAtenciones['totalAtenciones'];
+    }
+
+    $sqlCotizaciones = "SELECT COUNT(`idOrdenAtencion`) AS `totalCotizaciones`
+                        FROM `orden_atencion`
+                        WHERE `idPaciente` = '$idPaciente'
+                        AND `estado` = 'COTIZACION'";
+    $resCotizaciones = mysqli_query($link, $sqlCotizaciones) or die(mysqli_error($link));
+    if(mysqli_num_rows($resCotizaciones) > 0){
+        $rowCotizaciones = mysqli_fetch_array($resCotizaciones);
+        $totalCotizaciones = (int) $rowCotizaciones['totalCotizaciones'];
+    }
+
+    $nombreCompleto = trim($nombres . " " . $apellidoPat . " " . $apellidoMat);
+    $fechaNacimientoFmt = (!empty($fechaNacimiento) && $fechaNacimiento !== '0000-00-00')
+        ? date('d/m/Y', strtotime($fechaNacimiento))
+        : '-';
+    $fechaAtencionFmt = (!empty($fechaAtencion) && $fechaAtencion !== '0000-00-00 00:00:00')
+        ? date('d/m/Y H:i', strtotime($fechaAtencion))
+        : '-';
+    $fechaRegistroFmt = (!empty($fechaRegistro) && $fechaRegistro !== '0000-00-00 00:00:00')
+        ? date('d/m/Y H:i', strtotime($fechaRegistro))
+        : '-';
+    $saldoPendienteFmt = number_format((float) $saldoPendiente, 2, '.', ',');
+
     //lista de registro del cuaderno de odontologia 
 
-    echo "<div class='row'>";
+    echo "<div class='row g-3'>";
         echo "<div class='col-md-8'>";
-            echo "<div class='card'>";
-                echo "<div class='card-header d-flex justify-content-between align-items-center'>";
-                    echo "<b>Atencion Clínica</b>";
+            echo "<div class='card shadow-sm border-0'>";
+                echo "<div class='card-header bg-primary text-white'>";
+                    echo "<div class='d-flex justify-content-between align-items-start'>";
+                        echo "<div>";
+                            echo "<div class='fw-bold'>".htmlspecialchars($nombreCompleto)."</div>";
+                            echo "<div class='small opacity-75'>CI: ".htmlspecialchars($ci)." | Nac.: ".htmlspecialchars($fechaNacimientoFmt)."</div>";
+                        echo "</div>";
+                        echo "<div class='text-end'>";
+                            echo "<span class='badge bg-light text-dark me-1'>Especialidad: ".htmlspecialchars($especialidad)."</span>";
+                            //echo "<span class='badge bg-warning text-dark'>Estado: ".htmlspecialchars($estadoAtencion)."</span>";
+                        echo "</div>";
+                    echo "</div>";
                 echo "</div>";
-                echo "<div class='card-body row'>";
 
-                    echo "<div class='col-md-6'>";
-                        echo "<h5 class='card-title'>Paciente</h5>";
-                        echo "<p>" . $ci . " - " . $nombres . " " . $apellidoPat . " " . $apellidoMat . "</p>";
+                echo "<div class='card-body'>";
+                    echo "<div class='row g-3'>";
+                        echo "<div class='col-md-12'>";
+                            echo "<h6 class='text-uppercase text-muted mb-2'>Datos del paciente</h6>";
+                            echo "<div class='row g-2'>";
+                                echo "<div class='col-md-6'>";
+                                    echo "<div class='p-2 border rounded bg-light'>";
+                                        echo "<div class='small text-muted'>Telefono</div>";
+                                        echo "<div class='fw-semibold small'>".htmlspecialchars($celular)."</div>";
+                                    echo "</div>";
+                                echo "</div>";
+                                echo "<div class='col-md-6'>";
+                                    echo "<div class='p-2 border rounded bg-light'>";
+                                        echo "<div class='small text-muted'>Email</div>";
+                                        echo "<div class='fw-semibold small'>".htmlspecialchars($email)."</div>";
+                                    echo "</div>";
+                                echo "</div>";
+
+                                echo "<div class='col-md-6'>";
+                                    echo "<div class='p-2 border rounded bg-light'>";
+                                        echo "<div class='small text-muted'>Procedencia</div>";
+                                        echo "<div class='fw-semibold small'>".htmlspecialchars($procedencia)."</div>";
+                                    echo "</div>";
+                                echo "</div>";
+                                echo "<div class='col-md-6'>";
+                                    echo "<div class='p-2 border rounded bg-light'>";
+                                        echo "<div class='small text-muted'>Residencia</div>";
+                                        echo "<div class='fw-semibold small'>".htmlspecialchars($residencia)."</div>";
+                                    echo "</div>";
+                                echo "</div>";
+
+                                echo "<div class='col-md-12'>";
+                                    echo "<div class='p-2 border rounded bg-light'>";
+                                        echo "<div class='small text-muted'>Direccion</div>";
+                                        echo "<div class='fw-semibold small'>".htmlspecialchars($direccion)."</div>";
+                                    echo "</div>";
+                                echo "</div>";
+
+                                echo "<div class='col-md-12'>";
+                                    echo "<div class='p-2 border rounded bg-light'>";
+                                        echo "<div class='small text-muted'>Tutor</div>";
+                                        echo "<div class='fw-semibold small'>".htmlspecialchars($nombreTutor)."</div>";
+                                        echo "<div class='small text-muted'>".htmlspecialchars($celularTutor)."</div>";
+                                    echo "</div>";
+                                echo "</div>";
+                            echo "</div>";
+                        echo "</div>";
                     echo "</div>";
 
-                    echo "<div class='col-md-12 text-center'>";
-                        echo "<button class='btn btn-primary btn-sm m-2' id='btnFormExamenGeneral'><i class='fas fa-print'></i> Examen General</button>";
-                        echo "<button class='btn btn-danger btn-sm m-2' id='btnFormRegistroTratamientos'><i class='fas fa-print'></i> Registro Odontologico</button>";
-                        echo "<button class='btn btn-info btn-sm m-2' id='btnFormSolicitudProtesico'><i class='fas fa-print'></i> Solicitud Protesico</button>";
-                        echo "<button class='btn btn-warning btn-sm m-2' id='btnFormRayoxX'><i class='fas fa-print'></i> Rayox X</button>";
-                        echo "<button class='btn btn-fusion btn-sm m-2' id='btnHistorialOdontologico'><i class='fas fa-list'></i> Historial Odontologico</button>";
+                    echo "<hr class='my-3'/>";
+
+                    echo "<h6 class='text-uppercase text-muted mb-2'>Acciones clinicas</h6>";
+                    echo "<div class='row g-2'>";
+                        echo "<div class='col-6'>";
+                            echo "<button class='btn btn-primary btn-sm w-100' id='btnFormExamenGeneral'><i class='fas fa-print'></i> Examen General</button>";
+                        echo "</div>";
+                        echo "<div class='col-6'>";
+                            echo "<button class='btn btn-danger btn-sm w-100' id='btnFormRegistroTratamientos'><i class='fas fa-print'></i> Registro Odontologico</button>";
+                        echo "</div>";
+                        echo "<div class='col-6'>";
+                            echo "<button class='btn btn-info btn-sm w-100' id='btnFormSolicitudProtesico'><i class='fas fa-print'></i> Solicitud Protesico</button>";
+                        echo "</div>";
+                        echo "<div class='col-6'>";
+                            echo "<button class='btn btn-warning btn-sm w-100' id='btnFormRayoxX'><i class='fas fa-print'></i> Rayox X</button>";
+                        echo "</div>";
+                        echo "<div class='col-12'>";
+                            echo "<button class='btn btn-outline-secondary btn-sm w-100' id='btnHistorialOdontologico'><i class='fas fa-list'></i> Historial Odontologico</button>";
+                        echo "</div>";
                     echo "</div>";
-
-
-                
-
                 echo "</div>";
             echo "</div>";
-
         echo "</div>";
 
-        
-
         echo "<div class='col-md-4'>";
-            echo "<div class='card'>";
-                echo "<div class='card-header d-flex justify-content-between align-items-center'>";
+            echo "<div class='card shadow-sm border-0 h-100'>";
+                echo "<div class='card-header bg-white d-flex justify-content-between align-items-center'>";
                     echo "<b>Modulo Economico</b>";
+                    echo "<span class='badge bg-warning text-dark'>Pendiente: Bs. ".htmlspecialchars($saldoPendienteFmt)."</span>";
                 echo "</div>";
                 echo "<div class='card-body'>";
-                    
-                    echo "<div class='mt-2'>";
-                        //echo "<button type='button' class='btn btn-sm btn-outline-warning' id='btnRegistroCotizacion'><i class='fas fa-money-bill'></i> Cotizaciones</button>";
-                        echo "<button type='button' class='btn btn-sm btn-outline-primary' id='btnRegistroPrestaciones'><i class='fas fa-money-bill'></i> Registro Prestaciones</button>";
-                        echo "<button type='button' class='btn btn-sm btn-outline-danger' id='btnRegistroPago'><i class='fas fa-money-bill'></i> Registro Pago</button>";
+                    echo "<h6 class='text-uppercase text-muted mb-2'>Resumen de cuenta</h6>";
+                    echo "<div class='p-3 bg-light rounded mb-3'>";
+                        echo "<div class='d-flex justify-content-between align-items-center'>";
+                            echo "<span class='text-muted'>Saldo pendiente</span>";
+                            echo "<span class='fw-bold'>Bs. ".htmlspecialchars($saldoPendienteFmt)."</span>";
+                        echo "</div>";
+                        echo "<div class='mt-3 d-flex gap-2 flex-wrap'>";
+                            echo "<span class='badge bg-success'>Ordenes: ".htmlspecialchars((string)$totalAtenciones)."</span>";
+                            echo "<span class='badge bg-info text-dark'>Cotizaciones: ".htmlspecialchars((string)$totalCotizaciones)."</span>";
+                        echo "</div>";
+                        echo "<hr class='my-3'/>";
+                        echo "<div class='small text-muted'>";
+                            echo "Fecha atencion: ".htmlspecialchars($fechaAtencionFmt)."<br/>";
+                            echo "Fecha registro: ".htmlspecialchars($fechaRegistroFmt)."<br/>";
+                            echo "Especialidad: ".htmlspecialchars($especialidad)."<br/>";
+                        echo "</div>";
+                    echo "</div>";
+
+                    echo "<div class='d-grid gap-2'>";
+                        // Cotizaciones: disponible desde el backend por estados (ORDEN ATENCION y COTIZACION)
+                        echo "<button type='button' class='btn btn-outline-primary btn-sm' id='btnRegistroPrestaciones'><i class='fas fa-money-bill'></i> Registro Prestaciones</button>";
+                        echo "<button type='button' class='btn btn-outline-danger btn-sm' id='btnRegistroPago'><i class='fas fa-money-bill'></i> Registro Pago</button>";
+                    echo "</div>";
+
+                    echo "<hr class='my-3'>";
+                    echo "<div class='small text-muted'>";
+                        echo "Las estadisticas se calculan segun estados actuales del paciente.";
                     echo "</div>";
                 echo "</div>";
             echo "</div>";
